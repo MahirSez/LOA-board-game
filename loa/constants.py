@@ -1,0 +1,19 @@
+import pygame
+
+SQUARE_SIZE = 100
+FPS = 60
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+# WHITE =  (232, 235, 239)
+WHITE = 0xf0f0f0
+CREME_WHITE = 0xeedab6
+BLACK = (0, 0, 0)
+GREY = (125, 135, 150)
+# BROWN =(184,139,74)
+BROWN = 0xc7a47b
+
+
+BLACK_PIECE = 2
+WHITE_PIECE = 1
+EMPTY_CELL = 0
