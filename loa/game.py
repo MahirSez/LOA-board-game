@@ -1,6 +1,7 @@
 from loa.board import Board
 from loa.constants import *
 import collections
+import sys
 
 
 class Game:
@@ -23,6 +24,9 @@ class Game:
 			possible_moves = self.get_possible_moves(row, col)
 			self.board.draw_blue_circles(possible_moves)
 
+			if AI_vs_HUMAN_MODE and self.turn == WHITE_PIECE:#extra
+				self.show(possible_moves)
+
 			self.change_turn(False, row, col)
 
 		elif self.prev_selection == self.turn and self.is_valid_move(row, col):
@@ -31,12 +35,25 @@ class Game:
 			self.board.draw_blue_circles([self.prev_selected_coordinate, (row, col)])
 			self.board.draw_blue_line(self.prev_selected_coordinate, (row, col))
 
+			if AI_vs_HUMAN_MODE and self.turn == BLACK_PIECE: #extra
+				print(self.prev_selected_coordinate[0], self.prev_selected_coordinate[1] , row, col)
+
 			self.change_turn(True, row, col)
 
-		print()
+		self.debug_board()
+
+
+	def show(self, moves):#extra
+		print(len(moves))
+		for move in moves:
+			print(move[0] , move[1])
+
+
+	def debug_board(self):
+		print(file=sys.stderr)
 		for rows in self.board.board_config:
-			print(rows)
-		print()
+			print(rows, file=sys.stderr)
+		print(file=sys.stderr)
 
 	def outside_board(self, row, col):
 		return True if row < 0 or row >= self.board.board_size or col < 0 or col >= self.board.board_size else False
