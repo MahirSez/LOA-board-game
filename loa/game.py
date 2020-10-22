@@ -10,38 +10,36 @@ class Game:
 		self.opponent = WHITE_PIECE
 		self.prev_selection = EMPTY_CELL
 		self.prev_selected_coordinate = None
+		self.game_over = False
 
 	def select(self, row, col):
 
-		# for i in range(self.board.board_size):
-		# 	for j in range(self.board.board_size):
-		# 		val = self.get_tot_piece_in_diagonal2(i, j)
-		# 		if self.board.board_config[i][j] == EMPTY_CELL:
-		# 			val -=1
-		# 		print(val, end = " ")
-		# 	print()
-		# return
-
-		if row < 0 or row >= self.board.board_size or col < 0 or col >= self.board.board_size:
+		if self.game_over or self.outside_board(row, col):
 			return
 
 		if self.board.board_config[row][col] == self.turn:
 			self.board.draw()
 
 			possible_moves = self.get_possible_moves(row, col)
-			self.board.show_possible_moves(possible_moves)
+			self.board.draw_blue_circles(possible_moves)
 
 			self.change_turn(False, row, col)
 
 		elif self.prev_selection == self.turn and self.is_valid_move(row, col):
 			self.simulate_move(row, col)
 			self.board.draw()
+			self.board.draw_blue_circles([self.prev_selected_coordinate, (row, col)])
+			self.board.draw_blue_line(self.prev_selected_coordinate, (row, col))
+
 			self.change_turn(True, row, col)
 
 		print()
 		for rows in self.board.board_config:
 			print(rows)
 		print()
+
+	def outside_board(self, row, col):
+		return True if row < 0 or row >= self.board.board_size or col < 0 or col >= self.board.board_size else False
 
 	def change_turn(self, turn_complete, row, col):
 
@@ -71,8 +69,8 @@ class Game:
 		total_piece = sum(row.count(piece_color) for row in self.board.board_config)
 
 		if component_size == total_piece:
+			self.game_over = True
 			self.board.draw_winner(piece_color)
-			self.board.destroy()
 			return True
 		return False
 
@@ -95,9 +93,8 @@ class Game:
 			for i in range(8):
 				xx = x + dx[i]
 				yy = y + dy[i]
-				if xx < 0 or xx >= self.board.board_size or yy < 0 or yy >= self.board.board_size:
-					continue
-				if self.board.board_config[xx][yy] == piece_color and (xx, yy) not in visited:
+
+				if not self.outside_board(xx, yy) and self.board.board_config[xx][yy] == piece_color and (xx, yy) not in visited:
 					visited.add((xx, yy))
 					queue.append((xx, yy))
 
@@ -143,7 +140,7 @@ class Game:
 
 	def blocking_cell(self, row, col, dist_left):
 
-		if row < 0 or col < 0 or row >= self.board.board_size or col >= self.board.board_size:
+		if self.outside_board(row, col):
 			return True
 		if dist_left == 0:
 			return True if self.board.board_config[row][col] == self.turn else False
@@ -178,7 +175,7 @@ class Game:
 		while True:
 			row += row_delta
 			col += col_delta
-			if row < 0 or row >= self.board.board_size or col < 0 or col >= self.board.board_size:
+			if self.outside_board(row, col):
 				break
 			cnt += 1 if self.board.board_config[row][col] != EMPTY_CELL else 0
 		return cnt

@@ -22,8 +22,7 @@ class Board:
 
 		for row in range(0, self.board_size):
 			for col in range(row % 2, self.board_size, 2):
-				pygame.draw.rect(self.screen, CREME_WHITE,
-								 (row * SQUARE_SIZE, col * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+				pygame.draw.rect(self.screen, CREME_WHITE, (row * SQUARE_SIZE, col * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
 	def init_pieces(self):
 
@@ -41,41 +40,32 @@ class Board:
 				if self.board_config[row][col] != 0:
 					self.draw_piece(row, col, self.board_config[row][col])
 
+	def get_center_of_cell(self, pos):
+		(row, col) = pos
+		return col * SQUARE_SIZE + SQUARE_SIZE // 2, row * SQUARE_SIZE + SQUARE_SIZE // 2
+
 	def draw_piece(self, row, col, loa_piece):
 
 		piece_color = WHITE if loa_piece == WHITE_PIECE else BLACK
+		center_of_cell = self.get_center_of_cell((row, col))
+		pygame.draw.circle(self.screen, BLACK, center_of_cell, SQUARE_SIZE // 2 - 18)
+		pygame.draw.circle(self.screen, piece_color, center_of_cell, SQUARE_SIZE // 2 - 20)
 
-		circle_centerX = col * SQUARE_SIZE + SQUARE_SIZE // 2
-		circle_centerY = row * SQUARE_SIZE + SQUARE_SIZE // 2
-
-		pygame.draw.circle(self.screen, BLACK, (circle_centerX, circle_centerY), SQUARE_SIZE // 2 - 18)
-		pygame.draw.circle(self.screen, piece_color, (circle_centerX, circle_centerY), SQUARE_SIZE // 2 - 20)
-
-	def show_possible_moves(self, possible_moves):
+	def draw_blue_circles(self, possible_moves):
 
 		for pos in possible_moves:
-			(row, col) = pos
+			center_of_cell = self.get_center_of_cell(pos)
+			pygame.draw.circle(self.screen, BLUE, center_of_cell, SQUARE_SIZE // 2 - 40)
 
-			circle_centerX = col * SQUARE_SIZE + SQUARE_SIZE // 2
-			circle_centerY = row * SQUARE_SIZE + SQUARE_SIZE // 2
-
-			pygame.draw.circle(self.screen, BLUE, (circle_centerX, circle_centerY), SQUARE_SIZE // 2 - 40)
+	def draw_blue_line(self, pos1, pos2):
+		center_of_cell1 = self.get_center_of_cell(pos1)
+		center_of_cell2 = self.get_center_of_cell(pos2)
+		pygame.draw.line(self.screen, BLUE, center_of_cell1, center_of_cell2, 3)
 
 	def draw_winner(self, piece_color):
 		winner = "Black" if piece_color == BLACK_PIECE else "White"
 		winner += " wins"
 
-		pygame.draw.rect(self.screen, BLACK, (0, 0, self.board_width, self.board_width))
-
-		font = pygame.font.SysFont("comicsansms", 50)
-		text = font.render(winner, True, (255,255,255))
-		self.screen.blit(text, (self.board_width//4, self.board_width//2) )
-
-	def destroy(self):
-		self.board_config = [[EMPTY_CELL] * self.board_size for _ in range(self.board_size)]
-
-# def draw_turn_rect(self, turn):
-#
-# 	rect_color = WHITE if turn == WHITE_PIECE else BLACK
-# 	pygame.draw.line(self.screen, BLACK, (0, self.board_width), (self.board_width, self.board_width) ,10)
-# 	pygame.draw.rect(self.screen, rect_color, (0, self.board_width, self.board_width , self.board_width))
+		font = pygame.font.SysFont("comicsansms", self.board_width // 10)
+		text = font.render(winner, True, (255, 255, 255))
+		self.screen.blit(text, (self.board_width // 4, 0))
