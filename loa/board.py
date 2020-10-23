@@ -51,21 +51,21 @@ class Board:
 		pygame.draw.circle(self.screen, BLACK, center_of_cell, SQUARE_SIZE // 2 - 18)
 		pygame.draw.circle(self.screen, piece_color, center_of_cell, SQUARE_SIZE // 2 - 20)
 
-	def draw_blue_circles(self, possible_moves):
+	def draw_blue_circle_with_line(self, possible_moves):
 
+		assert len(possible_moves) > 0
+		starting_cell = self.get_center_of_cell(possible_moves[0])
 		for pos in possible_moves:
 			center_of_cell = self.get_center_of_cell(pos)
 			pygame.draw.circle(self.screen, BLUE, center_of_cell, SQUARE_SIZE // 2 - 40)
-
-	def draw_blue_line(self, pos1, pos2):
-		center_of_cell1 = self.get_center_of_cell(pos1)
-		center_of_cell2 = self.get_center_of_cell(pos2)
-		pygame.draw.line(self.screen, BLUE, center_of_cell1, center_of_cell2, 3)
+			pygame.draw.line(self.screen, BLUE, starting_cell, center_of_cell, 3)
 
 	def draw_winner(self, piece_color):
 		winner = "Black" if piece_color == BLACK_PIECE else "White"
 		winner += " wins"
 
+		rgb_color = BLACK if piece_color == BLACK_PIECE else (255, 255, 255)
+
 		font = pygame.font.SysFont("comicsansms", self.board_width // 10)
-		text = font.render(winner, True, (255, 255, 255))
+		text = font.render(winner, True, rgb_color)
 		self.screen.blit(text, (self.board_width // 4, 0))

@@ -22,7 +22,7 @@ class Game:
 			self.board.draw()
 
 			possible_moves = self.get_possible_moves(row, col)
-			self.board.draw_blue_circles(possible_moves)
+			self.board.draw_blue_circle_with_line(possible_moves)
 
 			if AI_vs_HUMAN_MODE and self.turn == WHITE_PIECE:#extra
 				self.show(possible_moves)
@@ -32,8 +32,7 @@ class Game:
 		elif self.prev_selection == self.turn and self.is_valid_move(row, col):
 			self.simulate_move(row, col)
 			self.board.draw()
-			self.board.draw_blue_circles([self.prev_selected_coordinate, (row, col)])
-			self.board.draw_blue_line(self.prev_selected_coordinate, (row, col))
+			self.board.draw_blue_circle_with_line([self.prev_selected_coordinate, (row, col)])
 
 			if AI_vs_HUMAN_MODE and self.turn == BLACK_PIECE: #extra
 				print(self.prev_selected_coordinate[0], self.prev_selected_coordinate[1] , row, col)
