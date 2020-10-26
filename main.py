@@ -65,7 +65,9 @@ def main():
 		if len(move) == 4:
 
 			if game.board.board_config[ move[0]][ move[1]] != now_turn:
-				write_file(now_turn)
+				game.game_over = True
+				change_turn()
+				game.board.draw_winner(now_turn)
 				continue
 
 			game.select(move[0], move[1])
@@ -78,13 +80,15 @@ def main():
 				line += str(move[0]) + " " + str(move[1]) + " " + str(move[2]) + " " + str(move[3])
 				write_file(line)
 			else:
-				write_file(now_turn)
+				game.game_over = True
+				change_turn()
+				game.board.draw_winner(now_turn)
 			continue
 
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				run = False
-			elif GAME_MODE != AI_VS_AI and event.type == pygame.MOUSEBUTTONDOWN:
+			elif GAME_MODE != AI_VS_AI and now_turn == 2 and event.type == pygame.MOUSEBUTTONDOWN:
 				col, row = get_board_cell(event.pos)
 				turn_changed = game.select(row, col)
 				if turn_changed != (-1, -1):

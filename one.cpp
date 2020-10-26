@@ -6,19 +6,20 @@ using namespace std;
 int N, my_color, enemy_color;
 
 const int INF = 1e6;
-
-const int max_depth = 5;
+const int max_depth = 1;
 
 bool first_move_done;
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 
 vector< vector<int> > board;
 
+int dx[] = {1, 1, 1, 0, 0, -1, -1, -1};
+int	dy[] = {-1, 0, 1, 1, -1, 1, 0, -1};
 
 void print_board(const vector< vector<int> >&board_config) {
     for(int i =0 ; i < N ; i++ ) {
-        for(int j =0 ; j < N ; j++ ) cout<<board_config[i][j]<<" ";
-        cout<<'\n';
+        for(int j =0 ; j < N ; j++ ) cerr<<board_config[i][j]<<" ";
+        cerr<<endl;
     }
 }
 
@@ -50,11 +51,17 @@ bool my_turn() {
     in>>now_turn;
     if( now_turn != my_color ) return false;
 
-    if(!first_move_done && my_color == BLACK) return true;
-    first_move_done = true;
+
+    if(!first_move_done && my_color == BLACK) {
+        first_move_done = true;
+        return true;
+    }
+
 
     int x1, y1, x2, y2;
     in>>x1>>y1>>x2>>y2;
+
+//    cerr<<"i got "<<x1<<" "<<y1<<" "<<x2<<" "<<y2<<endl;
 
     board[x1][y1] = 0;
     board[x2][y2] = enemy_color;
@@ -141,8 +148,8 @@ vector< pair<int,int> > traverse_possible_moves(const vector< vector<int> >&boar
 	    row += row_delta;
 	    col += col_delta;
 	    if(blocking_cell(board_config, row,col,i)) return ret;
-	    ret.push_back({row,col});
 	}
+    ret.push_back({row,col});
 	return ret;
 }
 
@@ -178,6 +185,8 @@ vector< pair<int,int> > get_possible_moves(const vector< vector<int> >&board_con
     vector< pair<int,int> > ret;
     vector< pair<int,int> >tmp;
 
+    
+
 	int row_move_dist = get_tot_piece_in_row(board_config, row, col);
 	tmp = get_row_moves(board_config, row, col, row_move_dist);
 	ret.insert(ret.end() , tmp.begin() , tmp.end());
@@ -193,6 +202,11 @@ vector< pair<int,int> > get_possible_moves(const vector< vector<int> >&board_con
     int diagonal2_move_dist = get_tot_piece_in_diagonal2(board_config, row, col);
 	tmp = get_diagonal2_moves(board_config, row, col, diagonal2_move_dist);
     ret.insert(ret.end() , tmp.begin() , tmp.end());
+
+
+    // if(row == 0 && col==1) {
+    //     cerr<<" -- "<<row_move_dist<<" "<<col_move_dist<<" "<<diagonal1_move_dist<<" "<<diagonal2_move_dist<<endl;
+    // }
 
 	return ret;
 }
@@ -211,42 +225,128 @@ vector< tuple<int, int, int, int> >get_all_possible_moves(const vector< vector<i
     return ret;
 }
 
-int heuristic(const vector< vector<int> > &board_config, bool maximizing_player) {
-    return  0;
+int heuristic_fun(const vector< vector<int> > &board_config, bool maximizing_player) {
+
+    int target_color = maximizing_player ? enemy_color : my_color;
+    int ret = 0;
+    // int tot_piece = 0;
+
+    for(int i =0 ; i < N ; i++ ) {
+        for(int j =0 ; j < N ; j++ ) {
+            if(board_config[i][j] != target_color) continue;
+            for(int k =0 ; k < 8 ; k++ ) {
+                int ii = i + dx[k];
+                int jj = j + dy[k];
+                if(!outside_board(ii,jj) && board_config[ii][jj] == target_color) ret++;
+            }
+        }
+    }
+    return ret;
 }
 
-bool is_terminating_condition(const vector< vector<int> >&board_config) {
-    return false;
+bool is_terminating_condition(vector< vector<int> >board_config) {
+
+	int black_cnt = 0, white_cnt = 0;
+	queue<tuple<int,int, int> >q;
+	int tot_white = 0, tot_black = 0;
+
+	for(int i =0 ;i <N ;i++ ) {
+	    for(int j =0 ; j < N ; j++ ) {
+	        tot_white += (board_config[i][j] == WHITE);
+	        tot_black += (board_config[i][j] == BLACK);
+	        if(black_cnt == 0 && board_config[i][j] == BLACK) {
+	            black_cnt = 1;
+	            q.push(make_tuple(BLACK, i,j));
+	            board_config[i][j] = 0;
+	        }
+	        else if(white_cnt == 0 && board_config[i][j] == WHITE) {
+	            white_cnt = 1;
+	            q.push(make_tuple(WHITE, i,j));
+	            board_config[i][j] = 0;
+	        }
+	    }
+	}
+
+	while(!q.empty()) {
+	    tuple<int,int, int>top = q.front();
+	    int top_color , row, col;
+	    tie(top_color, row, col) = top;
+	    q.pop();
+
+
+	    for(int i =0 ; i < 8 ; i++ ) {
+	        int xx = row + dx[i];
+	        int yy = col + dy[i];
+	        if(outside_board(xx,yy)) continue;
+	        if(board_config[xx][yy] != top_color) continue;
+
+            if(top_color == WHITE) white_cnt++;
+            else if(top_color == BLACK) black_cnt++;
+            else assert(0);
+            board_config[xx][yy] = 0;
+            q.push(make_tuple(top_color, xx, yy));
+	    }
+	}
+	return (white_cnt == tot_white || black_cnt == tot_black);
 }
 
 
 tuple<int,int,int,int,int> minimax(vector< vector<int> > board_config,int depth,int alpha, int beta, bool maximizing_player ) {
-    if(depth == 0 || is_terminating_condition(board_config)) return make_tuple( heuristic(board_config, maximizing_player) , -1, -1 ,-1, -1);
+    if(depth == 0 || is_terminating_condition(board_config)) return make_tuple( heuristic_fun(board_config, maximizing_player) , -1, -1 ,-1, -1);
+
+    
 
     int target_color = maximizing_player? my_color : enemy_color;
 
-    tuple<int,int,int,int,int> ret_val = make_tuple(-INF, -1, -1, -1, -1);
-    if(!maximizing_player) ret_val = make_tuple(INF, -1, -1, -1, -1);
+
+    tuple<int,int,int,int,int> ret_val = maximizing_player ?  make_tuple(-INF, -1, -1, -1, -1) :  make_tuple(INF, -1, -1, -1, -1);
 
     vector< pair<int,int> >positions = get_piece_positions(board_config, target_color);
     vector< tuple<int, int, int, int> > possible_moves = get_all_possible_moves(board_config, positions);
+
+
+    // for(auto x : possible_moves) {
+    //     int x1 , y1, x2, y2;
+    //     tie(x1, y1, x2, y2) = x;
+    //     cerr<<x1<<" "<<y1<<" "<<x2<<" "<<y2<<endl;
+    // }
+
+    // for(auto x : positions) {
+    //     cerr<<x.first<<" "<<x.second<<endl;
+    // }
+    // cerr<<endl;
+    
+
+
+    // cout<<target_color<<" "<<enemy_color<<endl;
+    // cerr<<possible_moves.size()<<endl;
+
+    
 
     for(auto x : possible_moves) {
 
         int frmX, frmY, toX, toY;
         tie(frmX, frmY, toX, toY) = x;
 
+
+        // cerr<<frmX<<" "<<frmY<<" "<<toX<<" "<<toY<<endl;
+
         int store_color = board_config[toX][toY];
         board_config[frmX][frmY] = 0;
         board_config[toX][toY] = target_color;
 
-        tuple<int,int,int,int,int> now_val = minimax(board_config, depth - 1 , alpha, beta, false);
+        tuple<int,int,int,int,int> now_val = minimax(board_config, depth - 1 , alpha, beta, !maximizing_player);
 
         board_config[toX][toY] = store_color;
         board_config[frmX][frmY] = target_color;
 
         int eval = get<0>(now_val);
+        // if(eval == 0 ) {
+        //     // cerr<<maximizing_player<<" "<<depth<<endl;
+        //     assert(0);
+        // }
         if( maximizing_player) {
+            
             ret_val = max(ret_val, make_tuple(eval, frmX, frmY, toX, toY) );
             alpha = max(alpha, eval);
         }
@@ -254,8 +354,15 @@ tuple<int,int,int,int,int> minimax(vector< vector<int> > board_config,int depth,
             ret_val = min(ret_val, make_tuple(eval, frmX, frmY, toX, toY) );
             beta = min(beta, eval);
         }
-        if( alpha <= beta) break;
+
+        if( alpha >= beta) {
+            // cerr<<"pruned at level "<<max_depth - depth<<endl;
+            break;
+        }
     }
+
+    // if( depth == 4) cerr<<" "<<get<0>(ret_val)<<endl;
+    // cerr<<get<0>(ret_val)<<endl;
     return ret_val;
 }
 
@@ -269,14 +376,22 @@ int main(int argc, char* argv[]) {
         if(!my_turn()) continue;
 
         clock_t start = clock();
+
+        
         tuple<int,int,int,int,int> ret = minimax(board, max_depth, -INF, INF, true);
 
 
         int mxVal ,x1, y1, x2, y2;
         tie(mxVal, x1, y1, x2, y2) = ret;
+
+        // if(x1 ==-1 || y1 == -1 || x2 == -1 || y2 == -1 ) break;
+        
+
         write_move(x1, y1, x2, y2);
 
-        fprintf(stderr, "time=%.3ldsec\n", (clock() - start)/CLOCKS_PER_SEC );
+        cerr<<mxVal<<" "<<x1<<" "<<y1<<" "<<x2<<" "<<y2<<endl;
+        cerr<<1.0*(clock() - start)/CLOCKS_PER_SEC <<"s"<<endl;
+        
 
     }
     return 0;
