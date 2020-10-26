@@ -1,5 +1,3 @@
-
-
 SQUARE_SIZE = 100
 FPS = 60
 RED = (255, 0, 0)
@@ -10,9 +8,15 @@ CREME_WHITE = 0xeedab6
 BLACK = (0, 0, 0)
 GREY = (125, 135, 150)
 BROWN = 0xc7a47b
-AI_vs_HUMAN_MODE = True
 
+SHARED_FILE = "shared.txt"
 
 BLACK_PIECE = 1
 WHITE_PIECE = 2
 EMPTY_CELL = 0
+
+HUMAN_VS_HUMAN = 1
+AI_VS_HUMAN = 2
+AI_VS_AI = 3
+
+

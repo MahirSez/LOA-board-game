@@ -15,37 +15,26 @@ class Game:
 
 	def select(self, row, col):
 
+		ret = (-1, -1)
 		if self.game_over or self.outside_board(row, col):
-			return
+			return ret
 
 		if self.board.board_config[row][col] == self.turn:
 			self.board.draw()
 
 			possible_moves = self.get_possible_moves(row, col)
 			self.board.draw_blue_circle_with_line(possible_moves)
-
-			if AI_vs_HUMAN_MODE and self.turn == WHITE_PIECE:#extra
-				self.show(possible_moves)
-
 			self.change_turn(False, row, col)
 
 		elif self.prev_selection == self.turn and self.is_valid_move(row, col):
 			self.simulate_move(row, col)
 			self.board.draw()
 			self.board.draw_blue_circle_with_line([self.prev_selected_coordinate, (row, col)])
-
-			if AI_vs_HUMAN_MODE and self.turn == BLACK_PIECE: #extra
-				print(self.prev_selected_coordinate[0], self.prev_selected_coordinate[1] , row, col)
-
+			ret = self.prev_selected_coordinate
 			self.change_turn(True, row, col)
 
-		self.debug_board()
-
-
-	def show(self, moves):#extra
-		print(len(moves))
-		for move in moves:
-			print(move[0] , move[1])
+		# self.debug_board()
+		return ret
 
 
 	def debug_board(self):

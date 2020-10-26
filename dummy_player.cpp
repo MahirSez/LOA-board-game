@@ -3,9 +3,10 @@
 #define WHITE 2
 using namespace std;
 
-const int N = 8;
+int N;
 
-int board[N][N];
+const int mx_board_sz = 10;
+int board[mx_board_sz][mx_board_sz];
 
 
 void print_board() {
@@ -15,7 +16,14 @@ void print_board() {
     }
 }
 
-void init(){
+void init(string s){
+    N = 0;
+    reverse(s.begin() , s.end());
+
+    for(auto x : s) {
+        int id = (x-'0');
+        N = N*10 + id;
+    }
     for(int i =1 ; i < N-1 ; i++ ) {
         board[0][i] = BLACK;
         board[N-1][i] = BLACK;
@@ -45,9 +53,12 @@ void gen_random_move() {
 
 }
 
-int main() {
+int main(int argc, char* argv[]) {
 
-    init();
+    
+
+    init(argv[1]);
+    return 0;
     string s;
     getline(cin,s);
     cerr<<s<<endl;
