@@ -1,4 +1,5 @@
 import pygame
+import pygame.gfxdraw
 
 from loa.constants import *
 
@@ -47,18 +48,20 @@ class Board:
 	def draw_piece(self, row, col, loa_piece):
 
 		piece_color = WHITE if loa_piece == WHITE_PIECE else BLACK
-		center_of_cell = self.get_center_of_cell((row, col))
-		pygame.draw.circle(self.screen, BLACK, center_of_cell, SQUARE_SIZE // 2 - 18)
-		pygame.draw.circle(self.screen, piece_color, center_of_cell, SQUARE_SIZE // 2 - 20)
+		centerX, centerY = self.get_center_of_cell((row, col))
+		pygame.gfxdraw.filled_circle(self.screen, centerX, centerY, SQUARE_SIZE // 2 - 20, piece_color)
+		pygame.gfxdraw.aacircle(self.screen, centerX, centerY, SQUARE_SIZE // 2 - 20, BLACK)
+		pygame.gfxdraw.aacircle(self.screen, centerX, centerY, SQUARE_SIZE // 2 - 19, BLACK)
 
 	def draw_blue_circle_with_line(self, possible_moves):
 
 		assert len(possible_moves) > 0
 		starting_cell = self.get_center_of_cell(possible_moves[0])
 		for pos in possible_moves:
-			center_of_cell = self.get_center_of_cell(pos)
-			pygame.draw.circle(self.screen, BLUE, center_of_cell, SQUARE_SIZE // 2 - 40)
-			pygame.draw.line(self.screen, BLUE, starting_cell, center_of_cell, 3)
+			centerX, centerY = self.get_center_of_cell(pos)
+			pygame.gfxdraw.filled_circle(self.screen, centerX, centerY, SQUARE_SIZE // 2 - 40, BLUE)
+			pygame.gfxdraw.aacircle(self.screen, centerX, centerY, SQUARE_SIZE // 2 - 40, BLUE)
+			pygame.draw.line(self.screen, BLUE, starting_cell, (centerX, centerY), 3)
 
 	def draw_winner(self, piece_color):
 		winner = "Black" if piece_color == BLACK_PIECE else "White"
