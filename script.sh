@@ -7,12 +7,12 @@
 # ./one 8 1
 #
 
-BOARD_SIZE=4
+BOARD_SIZE=8
 HUMAN_VS_HUMAN=1
 AI_VS_HUMAN=2
 AI_VS_AI=3
 
-GAME_MODE=$AI_VS_HUMAN
+GAME_MODE=$AI_VS_AI
 
 SHARED_FILE=shared.txt
 
@@ -35,13 +35,5 @@ if [ $GAME_MODE == $AI_VS_AI ] ;then
   python main.py $BOARD_SIZE $GAME_MODE | ./one $BOARD_SIZE 1 | ./one $BOARD_SIZE 2
 fi
 
-
-
-
-
-#
-#if [ $GAME_MODE == $AI_VS_AI ]; then
-#    ./dummy_player $BOARD_SIZE 2
-#fi
 
 

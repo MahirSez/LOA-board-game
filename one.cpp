@@ -6,7 +6,7 @@ using namespace std;
 int N, my_color, enemy_color;
 
 const int INF = 1e6;
-const int max_depth = 5;
+
 
 bool first_move_done;
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
@@ -22,21 +22,6 @@ void print_board(const vector< vector<int> >&board_config) {
         cerr<<endl;
     }
 }
-
-vector< vector<int > > v1 = {
-    {0, 0, 1, 0},
-    {0, 0, 2, 2},
-    {2, 1, 0, 2},
-    {0, 1, 1, 0}
-};
-
-vector< vector<int > > v2 = {
-    {0, 0, 0, 0},
-    {0, 0, 2, 2},
-    {2, 1, 0, 2},
-    {0, 1, 1, 0}
-};
-
 
 
 void init_board(string s1, string s2){
@@ -76,7 +61,6 @@ bool my_turn() {
     int x1, y1, x2, y2;
     in>>x1>>y1>>x2>>y2;
 
-//    cerr<<"i got "<<x1<<" "<<y1<<" "<<x2<<" "<<y2<<endl;
 
     board[x1][y1] = 0;
     board[x2][y2] = enemy_color;
@@ -222,13 +206,6 @@ vector< pair<int,int> > get_possible_moves(const vector< vector<int> >&board_con
     ret.insert(ret.end() , tmp.begin() , tmp.end());
 
 
-//    if(board_config == v1) {
-//    print_board(board_config);
-//        cerr<<"whyyy "<<row<<" "<<col<<endl;
-//        for(auto x : ret) cerr<<x.first<<" "<<x.second<<endl;
-//        cerr<<endl;
-//    }
-
 	return ret;
 }
 
@@ -246,20 +223,27 @@ vector< tuple<int, int, int, int> >get_all_possible_moves(const vector< vector<i
     return ret;
 }
 
-int heuristic_fun(const vector< vector<int> > &board_config) {
+int evaluation_function(const vector< vector<int> > &board_config) {
 
-    int target_color = my_color;
     int ret = 0;
     // int tot_piece = 0;
 
 
     for(int i =0 ; i < N ; i++ ) {
         for(int j =0 ; j < N ; j++ ) {
-            if(board_config[i][j] != target_color) continue;
-            for(int k =0 ; k < 8 ; k++ ) {
-                int ii = i + dx[k];
-                int jj = j + dy[k];
-                if(!outside_board(ii,jj) && board_config[ii][jj] == target_color) ret++;
+            if(board_config[i][j] == my_color) {
+                for(int k =0 ; k < 8 ; k++ ) {
+                    int ii = i + dx[k];
+                    int jj = j + dy[k];
+                    if(!outside_board(ii,jj) && board_config[ii][jj] == my_color) ret++;
+                }
+            }
+            else if(board_config[i][j] == enemy_color) {
+                for(int k =0 ; k < 8 ; k++ ) {
+                    int ii = i + dx[k];
+                    int jj = j + dy[k];
+                    if(!outside_board(ii,jj) && board_config[ii][jj] == enemy_color) ret--;
+                }
             }
         }
     }
@@ -338,8 +322,9 @@ result min( result &r1, result &r2) {
 }
 
 result minimax(vector< vector<int> > board_config,int depth,int alpha, int beta, bool maximizing_player ) {
+
     if(depth == 0 || is_terminating_condition(board_config)) {
-        result terminal_result = result( heuristic_fun(board_config) , -1, -1 ,-1, -1);
+        result terminal_result = result( evaluation_function(board_config) , -1, -1 ,-1, -1);
         terminal_result.stak.push(board_config);
         return terminal_result;
     }
@@ -401,16 +386,6 @@ result minimax(vector< vector<int> > board_config,int depth,int alpha, int beta,
         result now_val = minimax(board_config, depth - 1 , alpha, beta, !maximizing_player);
 
 
-        if(tmp_board == v1 && board_config == v2) {
-            print_board(tmp_board);
-            cerr<<endl;
-            print_board(board_config);
-            cerr<<endl;
-            cerr<<frmX<<" "<<frmY<<" "<<toX<<" "<<toY<<endl;
-            assert(0);
-        }
-
-
         int eval = now_val.val;
         result now_result = result(eval, frmX, frmY, toX, toY);
         now_result.stak = now_val.stak;
@@ -444,6 +419,7 @@ result minimax(vector< vector<int> > board_config,int depth,int alpha, int beta,
 int main(int argc, char* argv[]) {
 
     init_board(argv[1], argv[2]);
+    int max_depth = 3;
 
     while(1) {
 
@@ -461,8 +437,6 @@ int main(int argc, char* argv[]) {
         int x2 = ret.toX;
         int y2 = ret.toY;
 
-        // if(x1 ==-1 || y1 == -1 || x2 == -1 || y2 == -1 ) break;
-
         cerr<<ret.stak.size()<<endl;
 
         while(!ret.stak.empty()) {
@@ -470,13 +444,15 @@ int main(int argc, char* argv[]) {
             cerr<<endl;
             ret.stak.pop();
         }
-        
 
         write_move(x1, y1, x2, y2);
 
         cerr<<"my color= "<<my_color<<" , maxVal = "<<mxVal<<" , coord= "<<x1<<" "<<y1<<" "<<x2<<" "<<y2<<endl;
-        cerr<<1.0*(clock() - start)/CLOCKS_PER_SEC <<"s"<<endl;
-        
+        double time_taken =1.0*(clock() - start)/CLOCKS_PER_SEC;
+        cerr<< time_taken<<"s"<<endl;
+
+        if(time_taken <= 0.5) max_depth++;
+        else if(time_taken >= 2.5) max_depth--;
 
     }
     return 0;
