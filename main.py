@@ -2,6 +2,7 @@ import pygame
 import sys
 from loa.constants import *
 from loa.game import Game
+import time
 
 pygame.init()
 pygame.font.init()
@@ -61,29 +62,36 @@ def main():
 	game = Game(SCREEN, BOARD_SIZE)
 	while run:
 
-		move = read_file()
-		if len(move) == 4:
-
-			if game.board.board_config[ move[0]][ move[1]] != now_turn:
-				game.game_over = True
-				change_turn()
-				game.board.draw_winner(now_turn)
-				continue
-
-			game.select(move[0], move[1])
-			turn_changed = game.select(move[2], move[3])
-
-			if turn_changed != (-1, -1):
-
-				change_turn()
-				line = str(now_turn) + "\n"
-				line += str(move[0]) + " " + str(move[1]) + " " + str(move[2]) + " " + str(move[3])
-				write_file(line)
-			else:
-				game.game_over = True
-				change_turn()
-				game.board.draw_winner(now_turn)
+		if game.game_over :
 			continue
+
+		if GAME_MODE != HUMAN_VS_HUMAN:
+			move = read_file()
+			if len(move) == 4:
+				# time.sleep(3)
+
+				if game.board.board_config[ move[0]][ move[1]] != now_turn:
+					game.game_over = True
+					change_turn()
+					game.board.draw_winner(now_turn)
+					pygame.display.update()
+					continue
+
+				game.select(move[0], move[1])
+				turn_changed = game.select(move[2], move[3])
+
+				if turn_changed != (-1, -1):
+					change_turn()
+					line = str(now_turn) + "\n"
+					line += str(move[0]) + " " + str(move[1]) + " " + str(move[2]) + " " + str(move[3])
+					write_file(line)
+				else:
+					game.game_over = True
+					change_turn()
+					game.board.draw_winner(now_turn)
+
+				pygame.display.update()
+				continue
 
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:

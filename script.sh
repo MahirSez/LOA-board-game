@@ -3,11 +3,11 @@
 
 # echo "1" > shared.txt
 # g++ -std=c++11 one.cpp -o one
-
+#
 # ./one 8 1
+#
 
-
-BOARD_SIZE=6
+BOARD_SIZE=4
 HUMAN_VS_HUMAN=1
 AI_VS_HUMAN=2
 AI_VS_AI=3
@@ -21,7 +21,16 @@ if test -f "$SHARED_FILE" ;then
 fi
 
 
+if [ $GAME_MODE == $HUMAN_VS_HUMAN ] ;then
+  python main.py $BOARD_SIZE $GAME_MODE
+fi
+
 if [ $GAME_MODE == $AI_VS_HUMAN ] ;then
+  g++ -std=c++11 one.cpp -o one
+  python main.py $BOARD_SIZE $GAME_MODE | ./one $BOARD_SIZE 1
+fi
+
+if [ $GAME_MODE == $AI_VS_AI ] ;then
   g++ -std=c++11 one.cpp -o one
   python main.py $BOARD_SIZE $GAME_MODE | ./one $BOARD_SIZE 1 | ./one $BOARD_SIZE 2
 fi
