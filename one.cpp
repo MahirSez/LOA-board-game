@@ -94,11 +94,22 @@ void gen_random_move() {
 
 vector< pair<int,int> >get_piece_positions(const vector< vector<int> >&board_config, int color) {
     vector< pair<int,int> >ret;
-    for(int i =0 ; i < N ; i++ ) {
-        for(int j =0 ; j < N ; j++ ) {
-            if(board_config[i][j] == color) ret.push_back({i,j});
+    if(color == BLACK) {
+        for(int i =0 ; i < N ; i++ ) {
+            for(int j =0 ; j < N ; j++ ) {
+                if(board_config[i][j] == color) ret.push_back({i,j});
+            }
         }
     }
+    else if(color == WHITE) {
+        for(int j = 0 ; j < N ; j++) {
+            for(int i = N-1 ; i >=0 ; i--) {
+                if(board_config[i][j] == color) ret.push_back({i,j});
+            }
+        }
+    }
+    
+    else assert(0);
     return ret;
 }
 
@@ -281,10 +292,6 @@ int get_dist_sum_from_center_of_gravity(const vector< pair<int,int> > &pos) {
     }
 
     return dist_sum;
-
-
-
-
 }
 int eval_fun_shortest_distance_sum(const vector< vector<int> > &board_config)  {
 
@@ -308,7 +315,8 @@ int eval_fun_distance_from_center_of_gravity(const vector< vector<int> > &board_
 
 int evaluation_function(const vector< vector<int> > &board_config) {
 //    return eval_fun_connected_component(board_config);
-    return eval_fun_shortest_distance_sum(board_config);
+   return eval_fun_shortest_distance_sum(board_config);
+    // return eval_fun_distance_from_center_of_gravity(board_config);
 }
 
 int is_game_over(vector< vector<int> >board_config, bool last_move_by_me) {
@@ -400,9 +408,8 @@ pair<int,int> evaluate_terminating_condition(vector< vector<int> > board_config,
         ret =  {eval,1};
     }
     return ret;
-
-
 }
+
 
 result minimax(vector< vector<int> > board_config,int depth,int alpha, int beta, bool maximizing_player ) {
 
@@ -419,8 +426,8 @@ result minimax(vector< vector<int> > board_config,int depth,int alpha, int beta,
     result ret_result = maximizing_player ?  result(-INF, -1, -1, -1, -1) :  result(INF, -1, -1, -1, -1);
 
     vector< pair<int,int> >positions = get_piece_positions(board_config, target_color);
-    vector< tuple<int, int, int, int> > possible_moves = get_all_possible_moves(board_config, positions,target_color );
 
+    vector< tuple<int, int, int, int> > possible_moves = get_all_possible_moves(board_config, positions,target_color );
     // for(auto x : positions) {
     //     cerr<<x.first<<" "<<x.second<<endl;
     // }

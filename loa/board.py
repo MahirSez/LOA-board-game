@@ -59,8 +59,8 @@ class Board:
 		starting_cell = self.get_center_of_cell(possible_moves[0])
 		for pos in possible_moves:
 			centerX, centerY = self.get_center_of_cell(pos)
-			pygame.gfxdraw.filled_circle(self.screen, centerX, centerY, SQUARE_SIZE // 2 - 40, BLUE)
-			pygame.gfxdraw.aacircle(self.screen, centerX, centerY, SQUARE_SIZE // 2 - 40, BLUE)
+			pygame.gfxdraw.filled_circle(self.screen, centerX, centerY, BLUE_CIRCLE_RADIUS, BLUE)
+			pygame.gfxdraw.aacircle(self.screen, centerX, centerY, BLUE_CIRCLE_RADIUS, BLUE)
 			pygame.draw.line(self.screen, BLUE, starting_cell, (centerX, centerY), 3)
 
 	def draw_winner(self, piece_color):

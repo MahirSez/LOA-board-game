@@ -3,6 +3,7 @@ import sys
 from loa.constants import *
 from loa.game import Game
 import time
+import os
 
 pygame.init()
 pygame.font.init()
@@ -96,7 +97,7 @@ def main():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				run = False
-			elif GAME_MODE != AI_VS_AI and now_turn == 2 and event.type == pygame.MOUSEBUTTONDOWN:
+			elif GAME_MODE != AI_VS_AI and now_turn == 1 and event.type == pygame.MOUSEBUTTONDOWN:
 				col, row = get_board_cell(event.pos)
 				turn_changed = game.select(row, col)
 				if turn_changed != (-1, -1):
