@@ -69,7 +69,7 @@ def main():
 		if GAME_MODE != HUMAN_VS_HUMAN:
 			move = read_file()
 			if len(move) == 4:
-				# time.sleep(3)
+				# time.sleep(2)
 
 				if game.board.board_config[ move[0]][ move[1]] != now_turn:
 					game.game_over = True
