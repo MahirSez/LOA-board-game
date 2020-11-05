@@ -5,7 +5,7 @@ using namespace std;
 
 int N, my_color, enemy_color;
 
-const int INF = 1e6;
+const int INF = 1e9;
 const int WIN_VAL = 1e5;
 const int LOSE_VAL = -1e5;
 
@@ -238,7 +238,6 @@ vector< tuple<int, int, int, int> >get_all_possible_moves(const vector< vector<i
 int eval_fun_connected_component(const vector< vector<int> > &board_config) {
 
     int ret = 0;
-    // int tot_piece = 0;
 
     for(int i =0 ; i < N ; i++ ) {
         for(int j =0 ; j < N ; j++ ) {
@@ -309,14 +308,25 @@ int eval_fun_distance_from_center_of_gravity(const vector< vector<int> > &board_
     int my_dist_sum = get_dist_sum_from_center_of_gravity(my_pos);
     int enemy_dist_sum = get_dist_sum_from_center_of_gravity(enemy_pos);
     return enemy_dist_sum - my_dist_sum;
+}
 
+int eval_fun_mobility_sum(const vector< vector<int> > &board_config) {
+
+    vector< pair<int,int> >my_pos = get_piece_positions(board_config, my_color);
+    vector< tuple<int, int, int, int> > my_possible_moves = get_all_possible_moves(board_config, my_pos, my_color );
+
+    vector< pair<int,int> >enemy_pos = get_piece_positions(board_config, enemy_color);
+    vector< tuple<int, int, int, int> > enemy_possible_moves = get_all_possible_moves(board_config, enemy_pos, enemy_color );
+
+    return my_possible_moves.size() - enemy_possible_moves.size();
 }
 
 
 int evaluation_function(const vector< vector<int> > &board_config) {
-//    return eval_fun_connected_component(board_config);
-   return eval_fun_shortest_distance_sum(board_config);
+    // return eval_fun_mobility_sum(board_config);
+    // return eval_fun_connected_component(board_config);
     // return eval_fun_distance_from_center_of_gravity(board_config);
+    return eval_fun_shortest_distance_sum(board_config);
 }
 
 int is_game_over(vector< vector<int> >board_config, bool last_move_by_me) {
@@ -401,8 +411,8 @@ pair<int,int> evaluate_terminating_condition(vector< vector<int> > board_config,
     pair<int,int>ret = {0,0};
     int game_winner = is_game_over(board_config, last_move_by_me);
 
-    if(game_winner == my_color)  ret = {WIN_VAL + evaluation_function(board_config),1};
-    else if(game_winner == enemy_color)  ret = {LOSE_VAL + evaluation_function(board_config),1};
+    if(game_winner == my_color)  ret = { (depth+1)*WIN_VAL + evaluation_function(board_config),1};
+    else if(game_winner == enemy_color)  ret = { (depth+1)*LOSE_VAL + evaluation_function(board_config),1};
     else if(depth == 0 ) {
         int eval = evaluation_function(board_config);
         ret =  {eval,1};
@@ -428,17 +438,7 @@ result minimax(vector< vector<int> > board_config,int depth,int alpha, int beta,
     vector< pair<int,int> >positions = get_piece_positions(board_config, target_color);
 
     vector< tuple<int, int, int, int> > possible_moves = get_all_possible_moves(board_config, positions,target_color );
-    // for(auto x : positions) {
-    //     cerr<<x.first<<" "<<x.second<<endl;
-    // }
-    // cerr<<endl;
-    
 
-
-    // cout<<target_color<<" "<<enemy_color<<endl;
-    // cerr<<possible_moves.size()<<endl;
-
-    
 
     for(auto x : possible_moves) {
 
@@ -476,11 +476,6 @@ result minimax(vector< vector<int> > board_config,int depth,int alpha, int beta,
             beta = min(beta, eval);
         }
 
-//        if( now_result == ret_result ) {
-//            if( !stak.empty() && stak.top().first == depth) stak.pop();
-//            stak.push({depth, board_config});
-//        }
-
         if( alpha >= beta) break;
     }
     ret_result.stak.push(board_config);
@@ -491,7 +486,7 @@ result minimax(vector< vector<int> > board_config,int depth,int alpha, int beta,
 int main(int argc, char* argv[]) {
 
     init_board(argv[1], argv[2]);
-    int max_depth = 4;
+    int max_depth = (N == 8 ? 4 : 5 );
 
     while(1) {
 
@@ -524,10 +519,6 @@ int main(int argc, char* argv[]) {
         cerr<<"my color= "<<my_color<<" depth = "<<max_depth<<", maxVal = "<<mxVal<<" , coord= "<<x1<<" "<<y1<<" "<<x2<<" "<<y2<<endl;
         double time_taken =1.0*(clock() - start)/CLOCKS_PER_SEC;
         cerr<< time_taken<<"s"<<endl;
-
-        if(time_taken <= 0.5) max_depth++;
-        else if(time_taken >= 5) max_depth--;
-
     }
     return 0;
 }

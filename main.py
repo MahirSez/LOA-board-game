@@ -11,6 +11,9 @@ pygame.font.init()
 BOARD_SIZE = int(sys.argv[1])
 GAME_MODE = int(sys.argv[2])
 
+if GAME_MODE == AI_VS_HUMAN:
+	human_turn = int(sys.argv[3])
+
 BOARD_WIDTH = SQUARE_SIZE * BOARD_SIZE
 
 SCREEN = pygame.display.set_mode((BOARD_WIDTH, BOARD_WIDTH))
@@ -64,6 +67,9 @@ def main():
 	while run:
 
 		if game.game_over :
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					run = False
 			continue
 
 		if GAME_MODE != HUMAN_VS_HUMAN:
@@ -97,15 +103,16 @@ def main():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				run = False
-			elif GAME_MODE != AI_VS_AI and now_turn == 1 and event.type == pygame.MOUSEBUTTONDOWN:
-				col, row = get_board_cell(event.pos)
-				turn_changed = game.select(row, col)
-				if turn_changed != (-1, -1):
-					change_turn()
-					line = str(now_turn) + "\n"
-					line += str(turn_changed[0]) + " " + str(turn_changed[1]) + " " + str(row) + " " + str(col)
-					# debug(line)
-					write_file(line)
+			elif event.type == pygame.MOUSEBUTTONDOWN:
+				if GAME_MODE == HUMAN_VS_HUMAN or ( GAME_MODE == AI_VS_HUMAN and now_turn == human_turn):
+					col, row = get_board_cell(event.pos)
+					turn_changed = game.select(row, col)
+					if turn_changed != (-1, -1):
+						change_turn()
+						line = str(now_turn) + "\n"
+						line += str(turn_changed[0]) + " " + str(turn_changed[1]) + " " + str(row) + " " + str(col)
+						# debug(line)
+						write_file(line)
 
 		pygame.display.update()
 	pygame.quit()
